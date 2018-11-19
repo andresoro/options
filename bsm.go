@@ -66,7 +66,7 @@ func (o *Option) calculate() {
 
 }
 
-// Value returns option value at given time
+// Value returns option value at current time
 func (o *Option) Value() float64 {
 	o.calculate()
 	return o.val
