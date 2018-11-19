@@ -9,7 +9,9 @@ import (
 )
 
 // risk free rate
-var rate float64
+var (
+	rate = 0.0135
+)
 
 // Option contract
 type Option struct {
@@ -27,6 +29,8 @@ type Option struct {
 
 	G Greek
 
+	ticker string
+
 	//value of the option
 	val float64
 
@@ -35,13 +39,14 @@ type Option struct {
 }
 
 // New returns a new option
-func New(i, s, v float64, call bool, e time.Time) *Option {
+func New(i, s, v float64, call bool, t string, e time.Time) *Option {
 	opt := &Option{
-		I:    i,
-		S:    s,
-		V:    v,
-		E:    e,
-		call: call,
+		I:      i,
+		S:      s,
+		V:      v,
+		E:      e,
+		call:   call,
+		ticker: t,
 	}
 	return opt
 }
@@ -50,18 +55,17 @@ func (o *Option) calculate() {
 	//normal distribution
 	gauss := gaussian.NewGaussian(0, 1)
 	//time to expiry in years
-	o.T = (o.E.Sub(time.Now()).Hours() / 24) / 365
+	o.T = (((o.E.Sub(time.Now().Local()).Hours()) / 24) / 365)
 
-	//calculate d1
-	d1 := (math.Log(o.I/o.S) + (rate+math.Pow(o.V, 2)/2)*o.T) / (o.V * math.Sqrt(o.T))
+	d1 := (math.Log(o.I / o.S)) + (rate+(o.V*o.V)/2)*o.T
+	d1 = d1 / (o.V * math.Sqrt(o.T))
 
-	//calculate d2
 	d2 := d1 - (o.V * math.Sqrt(o.T))
 
 	if o.call {
-		o.val = (o.I * gauss.Cdf(d1)) - (o.S * gauss.Cdf(d2))
+		o.val = (o.I * gauss.Cdf(d1)) - (o.S * math.Exp(-rate*o.T) * gauss.Cdf(d2))
 	} else {
-		o.val = (o.S * gauss.Cdf(-d2)) - (o.I * gauss.Cdf(-d1))
+		o.val = (o.S * math.Exp(-rate*o.T) * gauss.Cdf(-d2)) - (o.I * gauss.Cdf(-d1))
 	}
 
 }
