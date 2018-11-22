@@ -70,6 +70,11 @@ func (o *Option) calculate() {
 
 }
 
+// compute and return implied volatility
+func (o *Option) Vol() float64 {
+	return 0
+}
+
 // Value returns option value at current time
 func (o *Option) Value() float64 {
 	o.calculate()

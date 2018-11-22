@@ -31,3 +31,7 @@ func TestBSM(t *testing.T) {
 	}
 
 }
+
+func TestVol(t *testing.T) {
+
+}
