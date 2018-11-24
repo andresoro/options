@@ -15,7 +15,7 @@ var (
 
 // Option contract
 type Option struct {
-	//current price
+	//current(spot) price
 	I float64
 	//strike price
 	S float64
@@ -54,6 +54,7 @@ func New(i, s, v float64, call bool, t string, e time.Time) *Option {
 func (o *Option) calculate() {
 	//normal distribution
 	gauss := gaussian.NewGaussian(0, 1)
+
 	//time to expiry in years
 	o.T = (((o.E.Sub(time.Now().Local()).Hours()) / 24) / 365)
 
@@ -62,16 +63,31 @@ func (o *Option) calculate() {
 
 	d2 := d1 - (o.V * math.Sqrt(o.T))
 
+	//derivative of cdf of d1
+	n := math.Pow((2*math.Pi), -0.5) * math.Exp(math.Pow(-0.5*d1, 2))
+
 	if o.call {
 		o.val = (o.I * gauss.Cdf(d1)) - (o.S * math.Exp(-rate*o.T) * gauss.Cdf(d2))
+		delta := gauss.Cdf(d1)
+		gamma := (n / (o.I * o.V * math.Pow(o.T, 0.5)))
+		vega := o.I * n * math.Pow(o.T, 0.5)
+		theta := (-(o.I * n * o.V) / (2 * math.Pow(o.T, 0.5))) - (rate * o.S * math.Exp(-rate*o.T) * gauss.Cdf(d2))
+		o.G.set(delta, gamma, vega, theta)
 	} else {
 		o.val = (o.S * math.Exp(-rate*o.T) * gauss.Cdf(-d2)) - (o.I * gauss.Cdf(-d1))
+		delta := gauss.Cdf(d1) - 1
+		gamma := (n / (o.I * o.V * math.Pow(o.T, 0.5)))
+		vega := o.I * n * math.Pow(o.T, 0.5)
+		theta := (-(o.I * n * o.V) / (2 * math.Pow(o.T, 0.5))) + (rate * o.S * math.Exp(-rate*o.T) * gauss.Cdf(-d2))
+		o.G.set(delta, gamma, vega, theta)
 	}
 
 }
 
-// compute and return implied volatility
+// TODO: compute and return implied volatility
+// use the newton raphson method
 func (o *Option) Vol() float64 {
+
 	return 0
 }
 
