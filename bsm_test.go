@@ -30,6 +30,25 @@ func TestBSM(t *testing.T) {
 		t.Error("Option returns wrong value")
 	}
 
+	//Test Greeks
+	delta := 0.2
+	gamma := 0.1
+	vega := 0.3
+	theta := 0.01
+	g := opt.Greeks()
+	if g.Delta != delta {
+		t.Error("Delta not equal")
+	}
+	if g.Gamma != gamma {
+		t.Error("Gamma not equal")
+	}
+	if g.Vega != vega {
+		t.Error("Vega not equal")
+	}
+	if g.Theta != theta {
+		t.Error("Theta not equal")
+	}
+
 }
 
 func TestVol(t *testing.T) {
