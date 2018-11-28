@@ -84,9 +84,14 @@ func (o *Option) calculate() {
 
 }
 
+// Greeks returns an options greek values
+func (o *Option) Greeks() Greek {
+	return o.G
+}
+
 // TODO: compute and return implied volatility
 // use the newton raphson method
-func (o *Option) Vol() float64 {
+func (o *Option) ImpliedVol() float64 {
 
 	return 0
 }
